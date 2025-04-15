@@ -72,6 +72,7 @@ function PaymentComponent() {
     </div>
   );
 }
+```
 
 ## Development Setup
 
