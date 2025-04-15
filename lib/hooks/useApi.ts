@@ -11,9 +11,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/threedsecure/v1', pub
     parameters: ThreeDSecureParameters,
     abortSignal: AbortSignal,
   ): AsyncIterableIterator<Authentication> => {
-    const eventSource = new EventSource(
-      `${baseUrl}/authentications/${parameters.id}/listen?publicKey=${publicKey}&accountId=5ad5126f-e474-40d7-9287-f8382444fe37`,
-    )
+    const eventSource = new EventSource(`${baseUrl}/authentications/${parameters.id}/listen?publicKey=${publicKey}`)
     const bucket = new Bucket<Authentication>()
     eventSource.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data) as Authentication
