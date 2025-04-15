@@ -1,54 +1,192 @@
-# React + TypeScript + Vite
+# 3D Secure React Library
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React library that simplifies the integration of 3D Secure (3DS) authentication for secure payment processing in web applications.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This library provides a set of React hooks and utilities to implement 3D Secure authentication flows in your payment applications. It supports the full 3DS authentication lifecycle including directory server interactions, challenges, and result handling.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Complete 3D Secure authentication flow
+- React hooks-based API
+- Handles the entire authentication lifecycle
+- Type-safe implementation with TypeScript
+- Responsive challenge rendering
+- Cancellable authentication processes
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Installation
+
+```bash
+npm install @sqala/threedsecure-react
+# or
+yarn add @sqala/threedsecure-react
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Quick Start
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```tsx
+import { useRef } from 'react';
+import { useThreeDSecure } from '@sqala/threedsecure-react';
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+function PaymentComponent() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { isExecuting, status, result, execute, cancel } = useThreeDSecure({
+    baseUrl: 'https://api.sqala.tech/threedsecure/v1',
+    publicKey: 'your-public-key',
+    container: containerRef
+  });
+
+  const handlePayment = async () => {
+    await execute({
+      id: 'payment-transaction-id' // Unique identifier for the authentication
+    });
+  };
+
+  return (
+    <div>
+      <button 
+        onClick={handlePayment}
+        disabled={isExecuting}
+      >
+        Process Payment
+      </button>
+      
+      {isExecuting && <p>Processing payment authentication...</p>}
+      {status && <p>Current status: {status}</p>}
+      
+      {/* Container for 3DS challenges */}
+      <div ref={containerRef} style={{ width: '100%', height: '400px' }} />
+      
+      {isExecuting && (
+        <button onClick={cancel}>Cancel</button>
+      )}
+      
+      {result && (
+        <div>
+          <h3>Authentication Result</h3>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js 18+ and npm/yarn
+- Modern browser with DevTools for debugging
+
+### Setting Up the Development Environment
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/rpo-pay/threedsecure-react.git
+   cd threedsecure-react
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+This will concurrently:
+- Build the library TypeScript files
+- Watch for changes in the lib folder
+- Start Vite's development server
+
+### Project Structure
+
 ```
+threedsecure-react/
+├── lib/                  # Library source code
+│   ├── hooks/            # React hooks
+│   ├── models/           # Data models
+│   ├── types/            # TypeScript type definitions
+│   └── main.ts           # Main entry point
+├── src/                  # Demo application
+├── dist/                 # Build output
+├── .vscode/              # VS Code configuration
+├── tsconfig.lib.json     # TypeScript config for the library
+└── vite.config.ts        # Vite configuration
+```
+
+## Debugging
+
+The project is configured with source maps for easy debugging. When using VS Code:
+
+1. Open the project in VS Code
+2. Set breakpoints in your code
+3. Press F5 to start debugging (this launches Edge with the development server)
+4. The debug session will automatically terminate the development server when stopped
+
+## Running Tests
+
+```bash
+npm run test
+# or
+yarn test
+```
+
+## Building for Production
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+This generates the library output in the `dist` directory.
+
+## Contributing
+
+We welcome contributions from the community! Here are some ways you can contribute:
+
+### Reporting Issues
+
+- Use the issue tracker to report bugs
+- Include detailed steps to reproduce the issue
+- Mention your environment (browser, OS, library version)
+
+### Feature Requests
+
+- Open an issue describing the feature
+- Explain the use case and benefits
+- Discuss implementation approaches
+
+### Pull Requests
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the existing code style and patterns
+- Write unit tests for new features
+- Update documentation for any API changes
+- Keep commits focused and atomic
+- Use semantic commit messages
+
+## License
+
+[MIT](LICENSE)
+
+## Acknowledgements
+
+- This library is developed and maintained by Sqala
+- Special thanks to all the contributors who have helped improve this project
