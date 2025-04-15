@@ -38,16 +38,16 @@ function PaymentComponent() {
     container: containerRef
   });
 
-  const handlePayment = async () => {
+  const handleAuthentication = async () => {
     await execute({
-      id: 'payment-transaction-id' // Unique identifier for the authentication
+      id: 'authentication-id' // Unique identifier for the authentication
     });
   };
 
   return (
     <div>
       <button 
-        onClick={handlePayment}
+        onClick={handleAuthentication}
         disabled={isExecuting}
       >
         Process Payment
