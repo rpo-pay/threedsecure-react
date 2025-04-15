@@ -104,9 +104,9 @@ function PaymentComponent() {
 
 3. Start the development server:
    ```bash
-   npm run dev
+   npm run start:dev
    # or
-   yarn dev
+   yarn start:dev
    ```
 
 This will concurrently:
