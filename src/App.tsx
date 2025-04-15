@@ -1,5 +1,5 @@
 import { type RefObject, useRef, useState } from 'react'
-import { useThreeDSecure } from '@sqala-threedsecure/library'
+import { useThreeDSecure } from '@sqala/threedsecure-react'
 import './App.css'
 
 function App() {
