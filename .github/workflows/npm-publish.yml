@@ -15,6 +15,5 @@ jobs:
           node-version: 22.x
       - run: yarn install
       - run: yarn build
+      - run: echo "//registry.npmjs.org/:_authToken=${NPM_PUBLIC_TOKEN}" > ~/.npmrc
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLIC_TOKEN}}
