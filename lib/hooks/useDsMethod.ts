@@ -45,11 +45,11 @@ export const useDsMethod = (container: RefObject<HTMLDivElement>) => {
       container.current.appendChild(iFrame)
 
       const submitForm = new Promise<void>((resolve, reject) => {
-        form.onload = () => {
+        iFrame.onload = () => {
           resolve()
         }
 
-        form.onerror = () => {
+        iFrame.onerror = () => {
           reject(new Error('Failed to execute dsMethod'))
         }
 

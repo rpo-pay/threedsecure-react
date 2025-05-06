@@ -39,7 +39,7 @@ function PaymentComponent() {
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { isExecuting, status, result, execute, cancel } = useThreeDSecure({
-    baseUrl: 'https://api.sqala.tech/threedsecure/v1',
+    baseUrl: 'https://api.sqala.tech/core/v1/threedsecure',
     publicKey: 'your-public-key',
     container: containerRef
   });

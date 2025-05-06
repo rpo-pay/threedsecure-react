@@ -43,6 +43,7 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
       dsTransId: authentication.dsTransId,
     })
     abortController.abort()
+    return Promise.resolve()
   }
 
   const execute = async (parameters: ThreeDSecureParameters) => {
@@ -75,7 +76,7 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
         console.log('useThreeDSecure: flowStep', authentication)
         setStatus(authentication.state)
         const action = actionMapping.get(authentication.state)
-        action?.(authentication)
+        await action?.(authentication)
       }
     } catch (error) {
       console.log('useThreeDSecure: error', error)

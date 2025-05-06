@@ -1,6 +1,6 @@
 {
   "name": "@sqala/threedsecure-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A React library for implementing 3D Secure authentication flows in payment applications",
   "type": "module",
   "author": "Sqala",
@@ -13,23 +13,14 @@
   "bugs": {
     "url": "https://github.com/rpo-pay/threedsecure-react/issues"
   },
-  "keywords": [
-    "3d-secure",
-    "3ds",
-    "payment",
-    "authentication",
-    "react",
-    "hooks"
-  ],
+  "keywords": ["3d-secure", "3ds", "payment", "authentication", "react", "hooks"],
   "exports": {
     ".": {
       "types": "./dist/main.d.ts",
       "default": "./dist/main.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "main": "./dist/main.js",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",

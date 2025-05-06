@@ -68,11 +68,11 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
       container.current.appendChild(iFrame)
 
       const submitForm = new Promise<void>((resolve, reject) => {
-        form.onload = () => {
+        iFrame.onload = () => {
           resolve()
         }
 
-        form.onerror = (_) => {
+        iFrame.onerror = (_) => {
           reject(new Error('Failed to execute challenge'))
         }
 

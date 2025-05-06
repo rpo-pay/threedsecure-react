@@ -26,8 +26,6 @@ function App() {
       return
     }
 
-    console.log('App: useEffect')
-
     execute({
       id: cardVault.threeDSecureId,
     })

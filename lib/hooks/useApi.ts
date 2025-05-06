@@ -6,7 +6,7 @@ export type UseApiOptions = {
   publicKey: string
 }
 
-export const useApi = ({ baseUrl = 'https://api.sqala.tech/threedsecure/v1', publicKey }: UseApiOptions) => {
+export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure', publicKey }: UseApiOptions) => {
   const executeAuthentication = (
     parameters: ThreeDSecureParameters,
     abortSignal: AbortSignal,
@@ -36,8 +36,8 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/threedsecure/v1', pub
     const ipResponseData = await ipResponse.json()
     console.log('useApi: setBrowserData - ipResponseData', ipResponseData)
 
-    const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1];
-    const colorDepth = allowedBrowserColorDepth.find(x => x <= screen.colorDepth) ?? 48;
+    const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1]
+    const colorDepth = allowedBrowserColorDepth.find((x) => x <= screen.colorDepth) ?? 48
     const browser = {
       ip: ipResponseData.IPv4,
       javaEnabled: true,
@@ -48,7 +48,8 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/threedsecure/v1', pub
       screenHeight: window.screen.height,
       timeZoneOffset: new Date().getTimezoneOffset(),
       colorDepth,
-      acceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      acceptHeader:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     }
     console.log('useApi: setBrowserData - browser', browser)
 
@@ -67,6 +68,6 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/threedsecure/v1', pub
 
   return {
     setBrowserData,
-    executeAuthentication
+    executeAuthentication,
   }
 }
