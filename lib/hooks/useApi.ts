@@ -32,14 +32,11 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
 
   const setBrowserData = async (parameters: ThreeDSecureParameters) => {
     console.log('useApi: setBrowserData', parameters)
-    const ipResponse = await fetch('https://geolocation-db.com/json/')
-    const ipResponseData = await ipResponse.json()
-    console.log('useApi: setBrowserData - ipResponseData', ipResponseData)
 
     const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1]
     const colorDepth = allowedBrowserColorDepth.find((x) => x <= screen.colorDepth) ?? 48
     const browser = {
-      ip: ipResponseData.IPv4,
+      ip: parameters.IPv4,
       javaEnabled: true,
       javascriptEnabled: true,
       language: navigator.language,
