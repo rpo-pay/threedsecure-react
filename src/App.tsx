@@ -22,14 +22,18 @@ function App() {
   })
 
   useEffect(() => {
-    if (!cardVault || isFinalized || isExecuting) {
-      return
-    }
+    if (cardVault) {
 
-    execute({
-      id: cardVault.threeDSecureId,
-    })
-  }, [cardVault, execute, isFinalized, isExecuting])
+      execute({
+        id: cardVault.threeDSecureId,
+        IPv4: "45.181.33.178",
+      })
+
+      return () => {
+        cancel()
+      }
+    }
+  }, [cardVault, execute, cancel])
 
   const handleExecute = async() => {
     await create({

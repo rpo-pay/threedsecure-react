@@ -81,6 +81,19 @@ function PaymentComponent() {
 }
 ```
 
+When calling `execute` on a `useEffect`, don't forget to use `cancel` as the cleanup function:
+
+```ts
+useEffect(() => {
+  execute({
+    id: "authentication-id",
+    IPv4: "244.134.46.222",
+  })
+
+  return cancel // clean up previous run changes if Effect re-runs
+})
+```
+
 ## Development Setup
 
 ### Prerequisites

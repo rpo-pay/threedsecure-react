@@ -1,5 +1,6 @@
 import type { Authentication, ThreeDSecureParameters } from '../types'
 import { Bucket } from '../models'
+import { useCallback } from 'react'
 
 export type UseApiOptions = {
   baseUrl?: string
@@ -7,7 +8,7 @@ export type UseApiOptions = {
 }
 
 export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure', publicKey }: UseApiOptions) => {
-  const executeAuthentication = (
+  const executeAuthentication = useCallback((
     parameters: ThreeDSecureParameters,
     abortSignal: AbortSignal,
   ): AsyncIterableIterator<Authentication> => {
@@ -28,9 +29,9 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       eventSource.close()
     })
     return bucket.iterator
-  }
+  }, [baseUrl, publicKey])
 
-  const setBrowserData = async (parameters: ThreeDSecureParameters) => {
+  const setBrowserData = useCallback(async (parameters: ThreeDSecureParameters, abortSignal: AbortSignal) => {
     console.log('useApi: setBrowserData', parameters)
 
     const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1]
@@ -56,12 +57,13 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(browser),
+      signal: abortSignal
     })
     console.log('useApi: setBrowserData - response', response)
     if (!response.ok) {
       throw new Error('Failed to set browser data')
     }
-  }
+  }, [baseUrl, publicKey])
 
   return {
     setBrowserData,
