@@ -7,7 +7,7 @@ export const useDsMethod = (container: RefObject<HTMLDivElement>) => {
   const { encode } = useBase64Encoder()
 
   const executeDsMethod = useCallback(async (authentication: Authentication, iFrame: HTMLIFrameElement, form: HTMLFormElement) => {
-    if (!authentication.dsMethodUrl) {
+    if (!authentication.dsMethodUrl || form.hasAttribute('data-submitted')) {
       return
     }
 
@@ -49,6 +49,7 @@ export const useDsMethod = (container: RefObject<HTMLDivElement>) => {
       }
 
       form.submit()
+      form.setAttribute('data-submitted', 'true')
     })
 
     await submitForm

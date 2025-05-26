@@ -25,7 +25,7 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
   }, [container])
 
   const executeChallenge = useCallback(async (authentication: Authentication, iFrame: HTMLIFrameElement, form: HTMLFormElement) => {
-    if (!authentication.acsUrl) {
+    if (!authentication.acsUrl || form.hasAttribute('data-submitted')) {
       return
     }
 
@@ -72,6 +72,9 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
       }
 
       form.submit()
+      // Execute challenge only once, be resilient to PENDING_CHALLENGE event
+      // being sent more than once, just do a no-op afterwards
+      form.setAttribute('data-submitted', 'true')
     })
 
     await submitForm
