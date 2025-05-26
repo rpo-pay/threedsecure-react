@@ -1,4 +1,4 @@
 export type ThreeDSecureParameters = {
   id: string
-  ip: string
+  ip?: string
 }

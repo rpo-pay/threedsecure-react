@@ -47,7 +47,7 @@ function PaymentComponent() {
   const handleAuthentication = async () => {
     await execute({
       id: 'authentication-id' // Unique identifier for the authentication
-      ip: '244.134.46.222' // Required user IP address
+      ip: '244.134.46.222' // Optional user's IP address
     });
   };
 
