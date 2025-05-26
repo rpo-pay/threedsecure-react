@@ -47,7 +47,7 @@ function PaymentComponent() {
   const handleAuthentication = async () => {
     await execute({
       id: 'authentication-id' // Unique identifier for the authentication
-      IPv4: '244.134.46.222' // Required user IP address
+      ip: '244.134.46.222' // Required user IP address
     });
   };
 
@@ -87,7 +87,7 @@ When calling `execute` on a `useEffect`, don't forget to use `cancel` as the cle
 useEffect(() => {
   execute({
     id: "authentication-id",
-    IPv4: "244.134.46.222",
+    ip: "244.134.46.222",
   })
 
   return cancel // clean up previous run changes if Effect re-runs

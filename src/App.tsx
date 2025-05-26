@@ -26,7 +26,7 @@ function App() {
 
       execute({
         id: cardVault.threeDSecureId,
-        IPv4: "45.181.33.178",
+        ip: "45.181.33.178",
       })
 
       return () => {

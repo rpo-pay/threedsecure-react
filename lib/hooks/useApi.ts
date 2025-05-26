@@ -37,7 +37,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
     const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1]
     const colorDepth = allowedBrowserColorDepth.find((x) => x <= screen.colorDepth) ?? 48
     const browser = {
-      ip: parameters.IPv4,
+      ip: parameters.ip,
       javaEnabled: true,
       javascriptEnabled: true,
       language: navigator.language,
