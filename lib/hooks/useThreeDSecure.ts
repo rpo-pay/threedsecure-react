@@ -58,6 +58,7 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
 
     abortController.signal.addEventListener('abort', () => {
       console.log('useThreeDSecure: Aborting')
+      setIsExecuting(false)
       iFrames.dsMethod.remove()
       forms.dsMethod.remove()
       iFrames.challenge.remove()
@@ -98,9 +99,8 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
       setIsFinalized(true)
       setError(error instanceof Error ? error.message : 'Failed to execute 3DS')
     } finally {
-      console.log('useThreeDSecure: setIsExecuting(false)')
-      setIsExecuting(false)
-      abortController.abort("finished executing")
+      console.log('useThreeDSecure: execution stopped')
+      abortController.abort("execution stopped")
     }
   }, [setBrowserData, executeAuthentication, executeDsMethod, executeChallenge, handleResult])
 
