@@ -136,7 +136,6 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
       log('Execution finished')
       setIsExecuting(false)
       cleanup()
-      abortController.abort()
     }
   }, [setBrowserData, executeAuthentication, executeDsMethod, executeChallenge, handleResult])
 

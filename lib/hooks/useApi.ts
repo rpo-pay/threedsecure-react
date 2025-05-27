@@ -1,4 +1,4 @@
-import type { Authentication, ThreeDSecureParameters } from '../types'
+import { AuthenticationState, type Authentication, type ThreeDSecureParameters } from '../types'
 import { Bucket } from '../models'
 import { useCallback } from 'react'
 
@@ -27,7 +27,12 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       logger('useApi: executeAuthentication - onmessage', parsedEvent)
       bucket.push(parsedEvent)
 
-      if (abortSignal.aborted) {
+      if (
+        parsedEvent.state === AuthenticationState.Failed ||
+        parsedEvent.state === AuthenticationState.AuthorizedToAttempt ||
+        parsedEvent.state === AuthenticationState.Completed ||
+        abortSignal.aborted
+      ) {
         close()
       }
     }
