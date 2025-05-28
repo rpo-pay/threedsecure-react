@@ -1,4 +1,4 @@
-import { type RefObject, useState } from 'react'
+import { type RefObject, useState, useCallback } from 'react'
 import {
   type Authentication,
   AuthenticationState,
@@ -15,8 +15,11 @@ export type UseThreeDSecureOptions = {
   container: RefObject<HTMLDivElement>
 }
 
+function getRandomNumber(min: number, max: number) {
+  return Math.round(Math.random() * (max - min) + min)
+}
+
 export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecureOptions) => {
-  const abortController = new AbortController()
   const [isExecuting, setIsExecuting] = useState(false)
   const [isFinalized, setIsFinalized] = useState(false)
   const [status, setStatus] = useState<AuthenticationState | null>(null)
@@ -26,13 +29,9 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
   const { executeDsMethod } = useDsMethod(container)
   const { executeChallenge } = useChallenge(container)
 
-  abortController.signal.addEventListener('abort', () => {
-    console.log('useThreeDSecure: Aborting')
-    setIsExecuting(false)
-  })
-
-  const handleResult = (authentication: Authentication) => {
-    console.log('useThreeDSecure: handleResult', authentication)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleResult = useCallback((authentication: Authentication, logger: (...rest: any[]) => void) => {
+    logger('Handle result', authentication)
     setIsFinalized(true)
     setResult({
       id: authentication.id,
@@ -42,55 +41,103 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
       eci: authentication.eci,
       dsTransId: authentication.dsTransId,
     })
-    abortController.abort()
-    return Promise.resolve()
-  }
+  }, [])
 
-  const execute = async (parameters: ThreeDSecureParameters) => {
-    console.log('useThreeDSecure: execute')
-    if (isExecuting) {
-      console.log('useThreeDSecure: isExecuting', isExecuting)
+  const execute = useCallback(async (options: ThreeDSecureParameters & {
+    abortController?: AbortController
+  }) => {
+    const id = getRandomNumber(100, 999)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const log = (message: string, ...rest: any[]) => {
+      console.log(`[${id}] useThreeDSecure: ${message}`, ...rest)
+    }
+
+    log('Execute start')
+    const { abortController: controller, ...parameters } = options
+
+    const abortController = controller ?? new AbortController()
+
+    const iFrames = {
+      dsMethod: document.createElement('iframe'),
+      challenge: document.createElement('iframe')
+    }
+
+    const forms = {
+      dsMethod: document.createElement('form'),
+      challenge: document.createElement('form')
+    }
+
+    const cleanup = () => {
+      log('Clean up')
+      iFrames.dsMethod.remove()
+      forms.dsMethod.remove()
+      iFrames.challenge.remove()
+      forms.challenge.remove()
+    }
+
+    if (abortController.signal.aborted) {
+      log('Already aborted, not executing')
+      setIsExecuting(false)
+      cleanup()
       return
     }
 
-    if (isFinalized) {
-      console.log('useThreeDSecure: isFinalized', isFinalized)
-      return
-    }
+    abortController.signal.addEventListener('abort', () => {
+      log('Aborted via event listener handler')
+      setIsExecuting(false)
+      cleanup()
+    })
 
     try {
       setIsExecuting(true)
 
-      console.log('useThreeDSecure: setBrowserData', parameters)
-      await setBrowserData(parameters)
+      log('Starting setBrowserData')
+      await setBrowserData(parameters, abortController.signal, log)
+      log('Finished setBrowserData')
 
-      const actionMapping = new Map([
-        [AuthenticationState.PendingDirectoryServer, executeDsMethod],
-        [AuthenticationState.PendingChallenge, executeChallenge],
-        [AuthenticationState.Failed, handleResult],
-        [AuthenticationState.Completed, handleResult],
-        [AuthenticationState.AuthorizedToAttempt, handleResult],
-      ])
+      if (abortController.signal.aborted) {
+        log('Aborted after finishing setBrowserData')
+        return
+      }
 
-      for await (const authentication of executeAuthentication(parameters, abortController.signal)) {
-        console.log('useThreeDSecure: flowStep', authentication)
+      for await (const authentication of executeAuthentication(parameters, abortController.signal, log)) {
+        if (abortController.signal.aborted) {
+          log('Aborted during execution')
+          break
+        }
+
+        log('Handle flowStep', authentication)
         setStatus(authentication.state)
-        const action = actionMapping.get(authentication.state)
-        await action?.(authentication)
+
+        switch (authentication.state) {
+          case AuthenticationState.PendingDirectoryServer:
+            await executeDsMethod(authentication, iFrames.dsMethod, forms.dsMethod)
+            break
+          case AuthenticationState.PendingChallenge:
+            iFrames.dsMethod.remove()
+            forms.dsMethod.remove()
+            await executeChallenge(authentication, iFrames.challenge, forms.challenge)
+            break
+          case AuthenticationState.ChallengeCompleted:
+            iFrames.challenge.remove()
+            forms.challenge.remove()
+            break
+          case AuthenticationState.Failed:
+          case AuthenticationState.Completed:
+          case AuthenticationState.AuthorizedToAttempt:
+            handleResult(authentication, log)
+        }
       }
     } catch (error) {
-      console.log('useThreeDSecure: error', error)
+      log('Error', error)
       setError(error instanceof Error ? error.message : 'Failed to execute 3DS')
     } finally {
-      console.log('useThreeDSecure: setIsExecuting(false)')
+      log('Execution finished')
       setIsExecuting(false)
+      cleanup()
     }
-  }
+  }, [setBrowserData, executeAuthentication, executeDsMethod, executeChallenge, handleResult])
 
-  const cancel = () => {
-    console.log('useThreeDSecure: cancel')
-    abortController.abort()
-  }
-
-  return { isExecuting, isFinalized, status, result, execute, cancel, error }
+  return { isExecuting, isFinalized, status, result, execute, error }
 }

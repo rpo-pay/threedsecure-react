@@ -16,20 +16,27 @@ function App() {
     publicKey: 'YOUR_PUBLIC_KEY_HERE',
   })
 
-  const { status, isExecuting, isFinalized, result, execute, error: threeDSecureError } = useThreeDSecure({
+  const { status, isExecuting, result, execute, error: threeDSecureError } = useThreeDSecure({
     publicKey: 'YOUR_PUBLIC_KEY_HERE',
     container: container as RefObject<HTMLDivElement>,
   })
 
   useEffect(() => {
-    if (!cardVault || isFinalized || isExecuting) {
-      return
-    }
+    if (cardVault) {
 
-    execute({
-      id: cardVault.threeDSecureId,
-    })
-  }, [cardVault, execute, isFinalized, isExecuting])
+      const abortController = new AbortController()
+
+      execute({
+        id: cardVault.threeDSecureId,
+        ip: "YOUR_IP_HERE",
+        abortController,
+      })
+
+      return () => {
+        abortController.abort()
+      }
+    }
+  }, [cardVault, execute])
 
   const handleExecute = async() => {
     await create({

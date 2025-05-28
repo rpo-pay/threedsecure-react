@@ -1,5 +1,6 @@
-import type { Authentication, ThreeDSecureParameters } from '../types'
+import { AuthenticationState, type Authentication, type ThreeDSecureParameters } from '../types'
 import { Bucket } from '../models'
+import { useCallback } from 'react'
 
 export type UseApiOptions = {
   baseUrl?: string
@@ -7,39 +8,59 @@ export type UseApiOptions = {
 }
 
 export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure', publicKey }: UseApiOptions) => {
-  const executeAuthentication = (
+  const executeAuthentication = useCallback((
     parameters: ThreeDSecureParameters,
     abortSignal: AbortSignal,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    logger: (...rest: any[]) => void
   ): AsyncIterableIterator<Authentication> => {
     const eventSource = new EventSource(`${baseUrl}/${parameters.id}/listen?publicKey=${publicKey}`)
     const bucket = new Bucket<Authentication>()
-    eventSource.onmessage = (event) => {
-      const parsedEvent = JSON.parse(event.data) as Authentication
-      console.log('useApi: executeAuthentication - onmessage', parsedEvent)
-      bucket.push(parsedEvent)
-    }
-    eventSource.onerror = (error) => {
-      console.log('useApi: executeAuthentication - onerror', error)
-      bucket.pushError(new Error('Failed to connect to event source'))
-    }
-    abortSignal.addEventListener('abort', () => {
-      console.log('useApi: executeAuthentication - abort')
+
+    const close = () => {
       bucket.close()
       eventSource.close()
+    }
+
+    eventSource.onmessage = (event) => {
+      const parsedEvent = JSON.parse(event.data) as Authentication
+      logger('useApi: executeAuthentication - onmessage', parsedEvent)
+      bucket.push(parsedEvent)
+
+      if (
+        parsedEvent.state === AuthenticationState.Failed ||
+        parsedEvent.state === AuthenticationState.AuthorizedToAttempt ||
+        parsedEvent.state === AuthenticationState.Completed ||
+        abortSignal.aborted
+      ) {
+        close()
+      }
+    }
+
+    eventSource.onerror = (error) => {
+      logger('useApi: executeAuthentication - onerror', error)
+      bucket.pushError(new Error('Failed to connect to event source'))
+
+      if (abortSignal.aborted) {
+        close()
+      }
+    }
+
+    abortSignal.addEventListener('abort', () => {
+      logger('useApi: executeAuthentication - abort')
+      close()
     })
     return bucket.iterator
-  }
+  }, [baseUrl, publicKey])
 
-  const setBrowserData = async (parameters: ThreeDSecureParameters) => {
-    console.log('useApi: setBrowserData', parameters)
-    const ipResponse = await fetch('https://geolocation-db.com/json/')
-    const ipResponseData = await ipResponse.json()
-    console.log('useApi: setBrowserData - ipResponseData', ipResponseData)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const setBrowserData = useCallback(async (parameters: ThreeDSecureParameters, abortSignal: AbortSignal, logger: (...rest: any[]) => void) => {
+    logger('useApi: setBrowserData', parameters)
 
     const allowedBrowserColorDepth = [48, 32, 24, 16, 15, 8, 4, 1]
     const colorDepth = allowedBrowserColorDepth.find((x) => x <= screen.colorDepth) ?? 48
     const browser = {
-      ip: ipResponseData.IPv4,
+      ip: parameters.ip,
       javaEnabled: true,
       javascriptEnabled: true,
       language: navigator.language,
@@ -51,7 +72,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       acceptHeader:
         'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     }
-    console.log('useApi: setBrowserData - browser', browser)
+    logger('useApi: setBrowserData - browser', browser)
 
     const response = await fetch(`${baseUrl}/${parameters.id}/browser?publicKey=${publicKey}`, {
       method: 'PATCH',
@@ -59,12 +80,13 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(browser),
+      signal: abortSignal
     })
-    console.log('useApi: setBrowserData - response', response)
+    logger('useApi: setBrowserData - response', response)
     if (!response.ok) {
       throw new Error('Failed to set browser data')
     }
-  }
+  }, [baseUrl, publicKey])
 
   return {
     setBrowserData,

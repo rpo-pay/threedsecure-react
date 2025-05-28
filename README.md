@@ -47,6 +47,7 @@ function PaymentComponent() {
   const handleAuthentication = async () => {
     await execute({
       id: 'authentication-id' // Unique identifier for the authentication
+      ip: 'user-ip' // Optional user's IP address
     });
   };
 
@@ -78,6 +79,23 @@ function PaymentComponent() {
     </div>
   );
 }
+```
+
+When calling `execute` on a `useEffect`, pass an `AbortController` and call
+`abort` on the cleanup function:
+
+```ts
+useEffect(() => {
+  const abortController = new AbortController()
+
+  execute({
+    id: "authentication-id",
+    ip: "user-ip",
+    abortController,
+  })
+
+  return () => abortController.abort()
+})
 ```
 
 ## Development Setup
