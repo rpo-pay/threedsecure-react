@@ -18,6 +18,32 @@ export type CardVaultRequest = {
   cvv: string
   threeDSecure: {
     value: number
+    installments?: number
+    currency?: string
+    billingAddress?: {
+      street: string
+      number?: string
+      complement?: string
+      neighborhood: string
+      city: string
+      state: string
+      country: string
+      postalCode: string
+    }
+    shippingAddress?: {
+      street: string
+      number?: string
+      complement?: string
+      neighborhood: string
+      city: string
+      state: string
+      country: string
+      postalCode: string
+    }
+    payer?: {
+      email: string
+      mobile: string
+    }
   }
 }
 
@@ -38,7 +64,7 @@ export const useCardVault = ({ baseUrl = 'https://api.sqala.tech/core/v1', publi
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       })
       const data = await response.json()
       setCardVault(data)
@@ -53,6 +79,6 @@ export const useCardVault = ({ baseUrl = 'https://api.sqala.tech/core/v1', publi
     error,
     isLoading,
     cardVault,
-    create
+    create,
   }
 }

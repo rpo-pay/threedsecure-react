@@ -6,29 +6,39 @@ import { useCardVault } from './hooks'
 function App() {
   const container = useRef<HTMLDivElement>(null)
   const [number, setNumber] = useState('')
-  const [expYear, setExpYear] = useState(33)
-  const [expMonth, setExpMonth] = useState(2)
-  const [holderName, setHolderName] = useState('HOLDER NAME')
-  const [cvv, setCvv] = useState('200')
-  const [value, setValue] = useState(100)
+  const [expYear, setExpYear] = useState(0)
+  const [expMonth, setExpMonth] = useState(0)
+  const [holderName, setHolderName] = useState('')
+  const [cvv, setCvv] = useState('')
+  const [value, setValue] = useState(0)
+  const [installments, setInstallments] = useState(1)
 
-  const { isLoading, error: cardVaultError, cardVault, create } = useCardVault({
-    publicKey: 'YOUR_PUBLIC_KEY_HERE',
+  const {
+    isLoading,
+    error: cardVaultError,
+    cardVault,
+    create,
+  } = useCardVault({
+    publicKey: 'YOUR PUBLIC KEY HERE',
   })
 
-  const { status, isExecuting, result, execute, error: threeDSecureError } = useThreeDSecure({
-    publicKey: 'YOUR_PUBLIC_KEY_HERE',
+  const {
+    status,
+    isExecuting,
+    result,
+    execute,
+    error: threeDSecureError,
+  } = useThreeDSecure({
+    publicKey: 'YOUR PUBLIC KEY HERE',
     container: container as RefObject<HTMLDivElement>,
   })
 
   useEffect(() => {
     if (cardVault) {
-
       const abortController = new AbortController()
 
       execute({
         id: cardVault.threeDSecureId,
-        ip: "YOUR_IP_HERE",
         abortController,
       })
 
@@ -38,7 +48,7 @@ function App() {
     }
   }, [cardVault, execute])
 
-  const handleExecute = async() => {
+  const handleExecute = async () => {
     await create({
       number,
       expYear,
@@ -47,6 +57,7 @@ function App() {
       cvv,
       threeDSecure: {
         value,
+        installments,
       },
     })
   }
@@ -102,6 +113,13 @@ function App() {
           value={value}
           onChange={(e) => setValue(Number.parseInt(e.target.value))}
           placeholder="Enter card value"
+        />
+        <input
+          className="input"
+          type="number"
+          value={installments}
+          onChange={(e) => setInstallments(Number.parseInt(e.target.value))}
+          placeholder="Enter installments"
         />
         <button className="button" type="button" onClick={handleExecute} disabled={isLoading || isExecuting}>
           Execute
