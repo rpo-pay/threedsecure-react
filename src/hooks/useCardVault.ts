@@ -17,7 +17,7 @@ export type CardVaultRequest = {
   holderName: string
   cvv: string
   threeDSecure: {
-    value: number
+    amount: number
     installments?: number
     currency?: string
     billingAddress?: {

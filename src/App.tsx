@@ -10,7 +10,7 @@ function App() {
   const [expMonth, setExpMonth] = useState(0)
   const [holderName, setHolderName] = useState('')
   const [cvv, setCvv] = useState('')
-  const [value, setValue] = useState(0)
+  const [amount, setAmount] = useState(0)
   const [installments, setInstallments] = useState(1)
 
   const {
@@ -56,7 +56,7 @@ function App() {
       holderName,
       cvv,
       threeDSecure: {
-        value,
+        amount,
         installments,
       },
     })
@@ -110,9 +110,9 @@ function App() {
         <input
           className="input"
           type="number"
-          value={value}
-          onChange={(e) => setValue(Number.parseInt(e.target.value))}
-          placeholder="Enter card value"
+          value={amount}
+          onChange={(e) => setAmount(Number.parseInt(e.target.value))}
+          placeholder="Enter card amount"
         />
         <input
           className="input"
