@@ -11,6 +11,18 @@ export enum AuthenticationState {
   Failed = 'FAILED',
 }
 
+export enum ThreeDSChallengeOptions {
+  NoPreference = '01',
+  NoChallengeRequested = '02',
+  ChallengeRequestedPreference = '03',
+  ChallengeRequestedMandated = '04',
+  ChallengeNotRequestedAntifraudApproved = '05',
+  ChallengeNotRequestedDataShareOnly = '06',
+  ChallengeNotRequestedAuthenticationAlreadyCompleted = '07',
+  ChallengeNotRequestedWhitelistExemptionIfNotRequired = '08',
+  ChallengeRequestedWhitelistPromptRequested = '09',
+}
+
 export type Address = {
   street: string
   number: Nullable<string>
@@ -59,7 +71,7 @@ export type Authentication = {
   id: string
   accountId: string
   transactionId: string
-  value: number
+  amount: number
   installments: number
   currency: string
   state: AuthenticationState
@@ -82,4 +94,5 @@ export type Authentication = {
   card: Nullable<Card>
   error: Nullable<AuthenticationError>
   failReason: Nullable<string>
+  challengeOptions: ThreeDSChallengeOptions
 }

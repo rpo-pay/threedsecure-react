@@ -18,22 +18,30 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       const bucket = new Bucket<Authentication>()
 
       const close = () => {
-        bucket.close()
-        eventSource.close()
+        try {
+          bucket.close()
+          eventSource.close()
+        } catch (error) {
+          logger('useApi: executeAuthentication - close - error', error)
+        }
       }
 
       eventSource.onmessage = (event) => {
-        const parsedEvent = JSON.parse(event.data) as Authentication
-        logger('useApi: executeAuthentication - onmessage', parsedEvent)
-        bucket.push(parsedEvent)
+        try {
+          const parsedEvent = JSON.parse(event.data) as Authentication
+          logger('useApi: executeAuthentication - onmessage', parsedEvent)
+          bucket.push(parsedEvent)
 
-        if (
-          parsedEvent.state === AuthenticationState.Failed ||
-          parsedEvent.state === AuthenticationState.AuthorizedToAttempt ||
-          parsedEvent.state === AuthenticationState.Completed ||
-          abortSignal.aborted
-        ) {
-          close()
+          if (
+            parsedEvent.state === AuthenticationState.Failed ||
+            parsedEvent.state === AuthenticationState.AuthorizedToAttempt ||
+            parsedEvent.state === AuthenticationState.Completed ||
+            abortSignal.aborted
+          ) {
+            close()
+          }
+        } catch (error) {
+          logger('useApi: executeAuthentication - onmessage - error', error)
         }
       }
 

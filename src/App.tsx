@@ -1,13 +1,13 @@
 import { type RefObject, useEffect, useRef, useState } from 'react'
-import { useThreeDSecure } from '@sqala/threedsecure-react'
+import { useThreeDSecure, ThreeDSChallengeOptions } from '@sqala/threedsecure-react'
 import './App.css'
 import { useCardVault } from './hooks'
 
 function App() {
   const container = useRef<HTMLDivElement>(null)
   const [number, setNumber] = useState('')
-  const [expYear, setExpYear] = useState(0)
-  const [expMonth, setExpMonth] = useState(0)
+  const [expYear, setExpYear] = useState(33)
+  const [expMonth, setExpMonth] = useState(12)
   const [holderName, setHolderName] = useState('')
   const [cvv, setCvv] = useState('')
   const [amount, setAmount] = useState(0)
@@ -58,6 +58,7 @@ function App() {
       threeDSecure: {
         amount,
         installments,
+        challengeOptions: ThreeDSChallengeOptions.ChallengeRequestedPreference,
       },
     })
   }

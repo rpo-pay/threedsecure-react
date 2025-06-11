@@ -87,8 +87,8 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
         return
       }
 
-      abortController.signal.addEventListener('abort', () => {
-        log('Aborted via event listener handler')
+      abortController.signal.addEventListener('abort', (event) => {
+        log('Aborted via event listener handler', event)
         setIsExecuting(false)
         cleanup()
       })
@@ -130,16 +130,17 @@ export const useThreeDSecure = ({ baseUrl, publicKey, container }: UseThreeDSecu
             case AuthenticationState.Failed:
             case AuthenticationState.Completed:
             case AuthenticationState.AuthorizedToAttempt:
+              abortController.abort('completed')
               handleResult(authentication, log)
+              break
           }
         }
       } catch (error) {
         log('Error', error)
+        abortController.abort('error')
         setError(error instanceof Error ? error.message : 'Failed to execute 3DS')
       } finally {
         log('Execution finished')
-        setIsExecuting(false)
-        cleanup()
       }
     },
     [setBrowserData, executeAuthentication, executeDsMethod, executeChallenge, handleResult],

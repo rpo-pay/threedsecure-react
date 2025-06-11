@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ThreeDSChallengeOptions } from '@sqala/threedsecure-react'
 
 export type UseCardVaultOptions = {
   baseUrl?: string
@@ -20,6 +21,7 @@ export type CardVaultRequest = {
     amount: number
     installments?: number
     currency?: string
+    challengeOptions?: ThreeDSChallengeOptions
     billingAddress?: {
       street: string
       number?: string
