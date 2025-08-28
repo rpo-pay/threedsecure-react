@@ -1,7 +1,7 @@
-import type { Authentication } from '../types'
 import { useCallback, type RefObject } from 'react'
-import { useBase64Encoder } from './useBase64Encoder'
 import { v4 } from 'uuid'
+import type { Authentication, IFrameEvents, Logger } from '../types'
+import { useBase64Encoder } from './useBase64Encoder'
 
 export enum ChallengeWindowSize {
   H400xW250 = '01',
@@ -11,7 +11,7 @@ export enum ChallengeWindowSize {
   Fullscreen = '05',
 }
 
-export const useChallenge = (container: RefObject<HTMLDivElement>) => {
+export const useChallenge = (container: RefObject<HTMLDivElement>, logger: Logger, iframeEvents?: IFrameEvents) => {
   const { encode } = useBase64Encoder()
 
   const getChallengeWindowSize = useCallback(() => {
@@ -26,10 +26,12 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
 
   const executeChallenge = useCallback(async (authentication: Authentication, iFrame: HTMLIFrameElement, form: HTMLFormElement) => {
     if (!authentication.acsUrl || form.hasAttribute('data-submitted')) {
+      logger('useChallenge.executeChallenge', 'skipped', authentication)
       return
     }
 
     container.current.style.position = 'relative'
+    logger('useChallenge.executeChallenge', 'configured container', container.current)
 
     iFrame.name = v4()
     iFrame.style.width = '100%'
@@ -37,17 +39,19 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
     iFrame.style.position = 'absolute'
     iFrame.style.top = '0'
     iFrame.style.left = '0'
+    logger('useChallenge.executeChallenge', 'configured iFrame', iFrame)
 
     form.style.visibility = 'hidden'
     form.name = v4()
     form.target = iFrame.name
     form.action = authentication.acsUrl
     form.method = 'POST'
+    logger('useChallenge.executeChallenge', 'configured form', form)
 
     const input = document.createElement('input')
     input.type = 'hidden'
     input.name = 'creq'
-    form.appendChild(input)
+    logger('useChallenge.executeChallenge', 'configured input', input)
 
     const data = {
       threeDSServerTransID: authentication.transactionId,
@@ -59,15 +63,22 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
 
     input.value = encode(data)
 
+    form.appendChild(input)
     container.current.appendChild(form)
     container.current.appendChild(iFrame)
+    iframeEvents?.onAppend?.(iFrame)
+    logger('useChallenge.executeChallenge', 'appended form and iFrame', container.current)
 
     const submitForm = new Promise<void>((resolve, reject) => {
       iFrame.onload = () => {
+        logger('useChallenge.executeChallenge', 'iFrame onload', iFrame)
+        iframeEvents?.onLoad?.(iFrame)
         resolve()
       }
 
       iFrame.onerror = (_) => {
+        logger('useChallenge.executeChallenge', 'iFrame onerror', iFrame)
+        iframeEvents?.onError?.(iFrame)
         reject(new Error('Failed to execute challenge'))
       }
 
@@ -78,7 +89,7 @@ export const useChallenge = (container: RefObject<HTMLDivElement>) => {
     })
 
     await submitForm
-  }, [container, encode, getChallengeWindowSize])
+  }, [container, encode, getChallengeWindowSize, logger, iframeEvents])
 
   return { executeChallenge }
 }

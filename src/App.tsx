@@ -31,6 +31,9 @@ function App() {
   } = useThreeDSecure({
     publicKey: 'YOUR PUBLIC KEY HERE',
     container: container as RefObject<HTMLDivElement>,
+    customLogger: (entrypoint, message, ...rest) => {
+      console.log(`[CUSTOM - LOGGER:${entrypoint}] ${message}`, ...rest)
+    },
   })
 
   useEffect(() => {
