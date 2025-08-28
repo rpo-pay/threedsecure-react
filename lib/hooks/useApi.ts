@@ -100,10 +100,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          accountId: '55809853-0e56-4cf1-a15a-3b16c3307baf',
-          browser
-        }),
+        body: JSON.stringify(browser),
         signal: abortSignal,
       })
       logger('useApi.setBrowserData', 'response', response)
