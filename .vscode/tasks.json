@@ -1,4 +1,5 @@
 {
+  "version": "2.0.0",
   "tasks": [
     {
       "label": "start:dev",
@@ -19,6 +20,19 @@
           "beginsPattern": "VITE v",
           "endsPattern": "Local:"
         }
+      }
+    },
+    {
+      "label": "stop:dev",
+      "type": "shell",
+      "command": "pkill",
+      "args": ["-f", "npm run start:dev"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
       }
     }
   ]

@@ -5,20 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
+      "type": "firefox",
       "request": "launch",
-      "name": "Launch Brave to Vite React-TS Project",
-      "runtimeExecutable": "/usr/bin/brave",
+      "name": "Launch Vite React-TS Project",
       "preLaunchTask": "start:dev",
+      "postDebugTask": "stop:dev",
       "serverReadyAction": {
         "pattern": "Local:\\s+(https?://\\S+)",
         "uriFormat": "%s",
         "action": "openExternally"
       },
       "url": "http://localhost:5173",
-      "cwd": "${workspaceFolder}",
       "webRoot": "${workspaceFolder}/src",
-      "sourceMaps": true,
       "skipFiles": ["<node_internals>/**"]
     }
   ]
