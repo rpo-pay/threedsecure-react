@@ -18,7 +18,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
         baseUrl,
         publicKey,
       })
-      const eventSource = new EventSource(`${baseUrl}/${parameters.id}/listen?publicKey=${publicKey}&accountId=55809853-0e56-4cf1-a15a-3b16c3307baf`)
+      const eventSource = new EventSource(`${baseUrl}/${parameters.id}/listen?publicKey=${publicKey}`)
       const bucket = new Bucket<Authentication>()
 
       const close = () => {
