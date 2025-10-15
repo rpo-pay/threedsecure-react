@@ -98,7 +98,7 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       const response = await fetch(`${baseUrl}/${parameters.id}/browser?publicKey=${publicKey}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+          'content-type': 'application/json',
         },
         body: JSON.stringify(browser),
         signal: abortSignal,
