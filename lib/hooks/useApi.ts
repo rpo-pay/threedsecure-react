@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import axios from 'axios'
 import { Bucket } from '../models'
 import { AuthenticationState, type Authentication, type Logger, type ThreeDSecureParameters } from '../types'
 
@@ -69,9 +70,8 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
   const setBrowserData = useCallback(
     async (parameters: ThreeDSecureParameters, abortSignal: AbortSignal) => {
       const getIpAddress = async () => {
-        const response = await fetch('https://api.ipify.org?format=json')
-        const data = await response.json()
-        return data.ip
+        const response = await axios.get('https://api.ipify.org?format=json')
+        return response.data.ip
       }
 
       logger('useApi.setBrowserData', 'starting', parameters)
@@ -95,18 +95,13 @@ export const useApi = ({ baseUrl = 'https://api.sqala.tech/core/v1/threedsecure'
       }
       logger('useApi.setBrowserData', 'browser', browser)
 
-      const response = await fetch(`${baseUrl}/${parameters.id}/browser?publicKey=${publicKey}`, {
-        method: 'PATCH',
+      const response = await axios.patch(`${baseUrl}/${parameters.id}/browser?publicKey=${publicKey}`, browser, {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify(browser),
         signal: abortSignal,
       })
       logger('useApi.setBrowserData', 'response', response)
-      if (!response.ok) {
-        throw new Error('Failed to set browser data')
-      }
     },
     [baseUrl, publicKey],
   )
